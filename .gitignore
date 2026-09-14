@@ -1,0 +1,10 @@
+# The Xcode project is generated from ios/project.yml by XcodeGen
+ios/*.xcodeproj
+ios/build/
+ios/DerivedData/
+*.ipa
+
+# macOS / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CFI — Dự đoán bóng đá</title>
+<meta name="description" content="Dự đoán bốn thị trường CFI theo bằng chứng strict-prior, chạy trực tiếp trên iPhone." />
+<meta name="theme-color" content="#0b1412" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="CFI" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+<link rel="icon" href="./icons/icon-192.png" />
+<link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+<header class="masthead">
+  <div class="shell">
+    <div class="wordmark">CFI <span id="engine">đang kiểm tra</span></div>
+    <div class="health"><i class="dot" id="health-dot"></i><span id="health-text">Máy chủ</span></div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <div class="entry">
+    <div class="teams">
+      <div class="team-field">
+        <label for="home">Đội nhà</label>
+        <input id="home" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="next" />
+      </div>
+      <div class="versus">gặp</div>
+      <div class="team-field">
+        <label for="away">Đội khách</label>
+        <input id="away" type="text" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="go" />
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <input id="date" type="date" aria-label="Ngày thi đấu" />
+      <select id="language" aria-label="Ngôn ngữ kết quả">
+        <option value="vi">Tiếng Việt</option>
+        <option value="en">English</option>
+        <option value="zh">中文</option>
+        <option value="th">ไทย</option>
+        <option value="id">Indonesia</option>
+      </select>
+    </div>
+
+    <button class="run" id="run" type="button">Phân tích trận này</button>
+  </div>
+
+  <div class="state" id="state" hidden>
+    <h2 id="state-title"></h2>
+    <p id="state-body"></p>
+    <div class="scan" id="scan" hidden><i></i></div>
+  </div>
+
+  <div id="result" hidden>
+
+    <div class="verdict">
+      <div class="call" id="call"></div>
+      <div class="pick" id="pick"></div>
+      <div class="fixture" id="fixture"></div>
+    </div>
+
+    <section>
+      <h2>Bốn thị trường cố định</h2>
+      <div id="markets"></div>
+      <p class="legend">Vạch trắng là Method A (thống kê lịch sử), vạch xanh là Method B (Match DNA). Thanh liền là xác suất Final sau hiệu chỉnh.</p>
+    </section>
+
+    <section id="scoreline-section" hidden>
+      <h2>Tỷ số khả dĩ</h2>
+      <div class="periods">
+        <div class="period">
+          <h3>Hiệp một</h3>
+          <div class="xg" id="xg-ht"></div>
+          <div id="scores-ht"></div>
+        </div>
+        <div class="period">
+          <h3>Cả trận</h3>
+          <div class="xg" id="xg-ft"></div>
+          <div id="scores-ft"></div>
+        </div>
+      </div>
+      <p class="path" id="path" hidden></p>
+    </section>
+
+    <section>
+      <h2>Bằng chứng và chất lượng dữ liệu</h2>
+      <div id="evidence"></div>
+    </section>
+
+    <section id="gates-section" hidden>
+      <h2>Cổng kiểm soát</h2>
+      <div id="gates"></div>
+    </section>
+
+    <details class="raw">
+      <summary>Xem dữ liệu thô từ máy chủ</summary>
+      <pre id="raw"></pre>
+    </details>
+
+  </div>
+
+  <details class="settings">
+    <summary>Cài đặt máy chủ</summary>
+    <div class="field">
+      <label for="api">Địa chỉ Worker</label>
+      <input id="api" type="url" inputmode="url" autocapitalize="none" autocorrect="off" spellcheck="false" />
+    </div>
+    <div class="actions">
+      <button id="save-api" type="button">Lưu</button>
+      <button id="reset-api" type="button">Về mặc định</button>
+    </div>
+    <p class="note">Ứng dụng chỉ đọc. Nó gửi tên đội và ngày thi đấu tới Worker, không lưu khoá bí mật nào trên máy.</p>
+  </details>
+
+  <footer>CFI Mobile — bằng chứng strict-prior. Xác suất là phân phối của mô hình, không phải kịch bản chắc chắn của trận đấu.</footer>
+
+</main>
+
+<script src="./app.js"></script>
+</body>
+</html>

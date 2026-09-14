@@ -1,0 +1,34 @@
+name: CFI
+options:
+  bundleIdPrefix: dev.cfi
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: ""
+    CODE_SIGNING_REQUIRED: "NO"
+    CODE_SIGNING_ALLOWED: "NO"
+    ENABLE_BITCODE: "NO"
+
+targets:
+  CFI:
+    type: application
+    platform: iOS
+    sources:
+      - path: CFI/Sources
+      - path: CFI/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.cfi.mobile
+        PRODUCT_NAME: CFI
+        INFOPLIST_FILE: CFI/Resources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "NO"
