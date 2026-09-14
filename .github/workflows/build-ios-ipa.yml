@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
     timeout-minutes: 25
 
     steps:
@@ -38,9 +38,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Show toolchain
+      # XcodeGen emits a newer project format than an older bundled Xcode can read,
+      # so pick the newest Xcode the runner actually has rather than its default.
+      - name: Select the newest Xcode
         run: |
           sw_vers
+          echo "Available Xcode versions:"
+          ls -d /Applications/Xcode*.app
+          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          echo "Selecting $NEWEST"
+          sudo xcode-select -s "$NEWEST/Contents/Developer"
           xcodebuild -version
 
       # Uploading through the GitHub web UI can nest the project one level deeper
@@ -53,11 +60,27 @@ jobs:
           echo
 
           SPEC=$(find . -name project.yml -not -path './.git/*' | head -1)
+
+          # Fallback: the GitHub web UI uploads a zip as a file, it does not
+          # unpack it. If the sources only exist inside an archive, unpack it here
+          # so the build can proceed.
+          if [ -z "$SPEC" ]; then
+            for ZIP in $(find . -name '*.zip' -not -path './.git/*'); do
+              if unzip -l "$ZIP" 2>/dev/null | grep -q 'project\.yml'; then
+                echo "No loose sources found. Unpacking $ZIP"
+                rm -rf .unpacked && mkdir -p .unpacked
+                unzip -q "$ZIP" -d .unpacked
+                SPEC=$(find .unpacked -name project.yml | head -1)
+                break
+              fi
+            done
+          fi
+
           if [ -z "$SPEC" ]; then
             echo "::error::No project.yml anywhere in this repository."
-            echo "The ios/ folder was not uploaded. Push with git, or re-upload so that"
-            echo "ios/ and .github/ sit at the repository root rather than inside a"
-            echo "wrapper folder."
+            echo "The ios/ folder was not uploaded. Push with git, or extract the zip"
+            echo "first and upload its contents so that ios/ and .github/ sit at the"
+            echo "repository root rather than inside a wrapper folder."
             exit 1
           fi
 
@@ -86,6 +109,21 @@ jobs:
         run: |
           xcodegen generate
           ls -la
+
+          PBX=CFI.xcodeproj/project.pbxproj
+          VERSION=$(grep -m1 'objectVersion' "$PBX" | grep -o '[0-9]\+')
+          echo "XcodeGen wrote objectVersion $VERSION"
+
+          # Anything above 60 is only readable by very recent Xcode. The project uses
+          # nothing that needs it, so pin it down to a format every supported Xcode
+          # reads. This keeps the build working whatever the runner image ships.
+          if [ "$VERSION" -gt 60 ]; then
+            echo "Lowering objectVersion to 56 for compatibility"
+            sed -i '' 's/objectVersion = [0-9]*;/objectVersion = 56;/' "$PBX"
+            grep -m1 'objectVersion' "$PBX"
+          fi
+
+          xcodebuild -list -project CFI.xcodeproj
 
       - name: Build unsigned archive
         working-directory: ${{ steps.locate.outputs.dir }}
